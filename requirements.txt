@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+transformers
+torch
+torchaudio
+ffmpeg-python
+python-multipart
