@@ -5,19 +5,14 @@ import tempfile
 
 app = FastAPI()
 
-# Allow frontend access (CORS)
+# Allow CORS (important)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace "*" with your frontend URL later if needed
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Load model at startup
-print("Loading Quranic Whisper model...")
-model = pipeline("automatic-speech-recognition", model="tarteel-ai/whisper-base-ar-quran")
-print("Model loaded.")
 
 @app.post("/transcribe")
 async def transcribe(file: UploadFile = File(...)):
@@ -25,6 +20,9 @@ async def transcribe(file: UploadFile = File(...)):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             tmp.write(await file.read())
             tmp_path = tmp.name
+
+        # Load model **inside** request instead of at startup
+        model = pipeline("automatic-speech-recognition", model="tarteel-ai/whisper-base-ar-quran")
 
         result = model(tmp_path)
 
